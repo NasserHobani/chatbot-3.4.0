@@ -1,0 +1,34 @@
+{
+    "name": "OmniSync",
+    "description": "The OmniSync Addon for SaleBot enhances your communication capabilities by providing seamless integration with Facebook, Instagram, and other messaging platforms.",
+    "version": "1.0.0",
+    "author": {
+        "name": "SpaGreen Creative",
+        "url": "https://codecanyon.net/user/spagreen/portfolio"
+    },
+    "tags": [
+        "Addon"
+    ],
+    "addon_identifier": "omnisync",
+    "required_cms_version": "330",
+    "required_app_version": "330",
+    "license": {
+        "type": "General Public License",
+        "url": "https://mit-license.org/GPL"
+    },
+    "terms": "",
+    "features": [
+
+    ],
+    "support": {
+        "contact_email": "support@spagreenc.net",
+        "documentation_url": ""
+    },
+    "changelog": [
+        {
+            "version": "1.0.0",
+            "date": "2025-05-10",
+            "changes": ""
+        }
+    ]
+}
