@@ -4,6 +4,7 @@ namespace App\Repositories\Webhook;
 use App\Models\Flow;
 use App\Models\Client;
 use App\Models\Contact;
+use App\Models\User;
 use App\Models\Country;
 use App\Models\Message;
 use App\Models\Segment;
@@ -309,7 +310,7 @@ class WhatsappRepository
     private function saveIncommingMessage($contact, $content, $client, $is_contact_msg, $is_campaign_msg, $type, $message_id)
     {
         try {
-
+		    Log::info("save incoming message ");
             $existingMessage = Message::where('message_id', $message_id)->first();
 
             if ($existingMessage) {
@@ -409,17 +410,37 @@ class WhatsappRepository
             $message->status = MessageStatusEnum::DELIVERED;
             $message->update();
             if (setting('is_pusher_notification_active')) {
-                event(new \App\Events\ReceiveUpcomingMessage($client));
+                if($contact->assignee_id){
+                    Log::info("assignee_id found: ".$contact->assignee_id);
+                    event(new \App\Events\ReceiveAssignedMessage($client, $contact->assignee_id));
+                } else{
+                    Log::info("assignee_id not found");
+                    event(new \App\Events\ReceiveUpcomingMessage($client));
+                }
             }
 
             if (setting('is_onesignal_active')) {
-                $this->pushNotification([
-                    'contact_id' => $contact->id,
-                    'ids' => OneSignalToken::where('client_id', $client->id)->pluck('subscription_id')->toArray(),
-                    'message' => $notified_message,
-                    'heading' => $contact->name,
-                    'url' => route('client.chat.index', ['contact' => $contact->id]),
-                ]);
+                if($contact->assignee_id){
+                    $user = User::find($contact->assignee_id);
+                    // Log::info("assignee: ". $user->onesignal_player_id);
+                    $this->pushNotification([
+                        'contact_id' => $contact->id,
+                        'ids' => $user->onesignal_player_id,
+                        'message' => $notified_message,
+                        'heading' => $contact->name,
+                        'url' => route('client.chat.index', ['contact' => $contact->id]),
+                    ]);
+                } else {
+                    $this->pushNotification([
+                        'contact_id' => $contact->id,
+                        'ids' => OneSignalToken::where('client_id', $client->id)->pluck('subscription_id')->toArray(),
+                        'message' => $notified_message,
+                        'heading' => $contact->name,
+                        'url' => route('client.chat.index', ['contact' => $contact->id]),
+                    ]);
+                }
+
+                
             }
 
             $contact->update([

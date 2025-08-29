@@ -22,7 +22,7 @@ class ReceiveUpcomingMessage implements ShouldBroadcast
     public function broadcastOn()
     {
         $client_id = $this->client->id;
-
+        Log::info("message-received-$client_id");
         return ["message-received-$client_id"];
     }
 }

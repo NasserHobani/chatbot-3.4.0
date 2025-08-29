@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use Log;
 
 class AuthController extends Controller
 {
@@ -39,6 +40,7 @@ class AuthController extends Controller
             return $this->responseWithError(__('validation_failed'), $validator->errors(), 422);
         }
         try {
+            Log::info("login request: ", $request->all());
             $user              = User::with('client')->where('email', $request->email)->where('user_type', 'client-staff')->first();
 
             $check_user_status = userAvailability($user);
@@ -57,6 +59,22 @@ class AuthController extends Controller
                 return $this->responseWithError($e->getMessage(), [], 500);
             }
             Auth::attempt($credentials);
+
+            // Ensure player_id is always an array
+            $ids = is_array($request->player_id) ? $request->player_id : [];
+            
+            // Only add to array if player_id is provided and not empty
+            if ($request->filled('player_id') && !empty($request->player_id)) {
+                $ids[] = $request->player_id;
+            }
+
+            auth()->user()->update([
+                'onesignal_player_id'     => array_unique($ids),
+                'is_onesignal_subscribed' => 1,
+            ]);
+
+            // Log::info(["user LoggedIn: ", auth()->user()]);
+
             //dd($user);
             return $this->responseWithSuccess(__('login_successfully'), authData($user, $token));
         } catch (\Exception $e) {

@@ -163,7 +163,7 @@ class MessageController extends Controller
             'button_matchs' => 'nullable|array',
             'image'         => 'nullable|file|mimes:jpeg,png,jpg|max:2048',
             'document'      => 'nullable|file|mimes:pdf|max:5120',
-            'video'         => 'nullable|file|mimes:mp4|max:10240',
+            'video'         => 'nullable|file|mimes:mp4|max:19240',
             'audio'         => 'nullable|file|mimes:mp3|max:5120',
         ]);
         if ($validator->fails()) {

@@ -345,27 +345,44 @@ trait BotReplyTrait
                     Log::info("box-team");
                     $team = TeamGroup::where('id', $node->data['team_id'])->first();
                     $staffs = $team->staff;
+                    $staff_online = [];
+                    $all_staffs = [];
                     $min_contacts = null;
                     $staff_id = null;
-                    $staff_user = null;
+                    $staff_name = null;
+                    Log::info($staffs);
 
                     foreach ($staffs as $staff) {
                         $contact_count = $staff->contacts()->count();
-                        if ($min_contacts === null || $contact_count < $min_contacts) {
-                            $min_contacts = $contact_count;
-                            $staff_user = $staff;
-                            $staff_id = $staff->user_id;
+                        $data = ['staff_name' => $staff->user->first_name, 'contact_count' => $contact_count, 'staff_id' => $staff->user->id];
+                        if (Cache::has('user-is-online-' . $staff->user->id)) {
+                            Log::info("staff" . $staff->user->first_name);
+                            Log::info("staff" . $staff->user->messages);
+                            array_push($staff_online, $data);
                         }
+                        array_push($all_staffs, $data);
+
                     }
+                    Log::info($staff_online);
+                    Log::info($all_staffs);
+                    if ($staff_online) {
+                        $object = array_reduce($staff_online, function($a, $b){
+                            return $a['contact_count'] < $b['contact_count'] ? $a : $b;
+                        }, array_shift($staff_online));
+                        $staff_id = $object['staff_id'];
+                        $staff_name = $object['staff_name'];
+                    }else{
+                        $object = array_reduce($all_staffs, function($a, $b){
+                            return $a['contact_count'] < $b['contact_count'] ? $a : $b;
+                        }, array_shift($all_staffs));
+                        $staff_id = $object['staff_id'];
+                        $staff_name = $object['staff_name'];
+                    }
+
                     Log::info("Assigning to staff with Id {$staff_id}");
-                    Log::info($staffs);
-                    Log::info("Team Group Id is:" . $node->data['team_id']);
-                    Log::info($staff_id);
-                    Log::info($message);
-                    Log::info($staff_id);
                     Contact::where('id', $message['contact_id'])->update(['assignee_id' => $staff_id, 'bot_reply' => 0]);
-                    $name = $staff_user->user->first_name;
-                    $data['reply_text'] = " لقد قمنا باسناد طلبك الى {$name}";
+//                    $name = $staff_user->user->first_name;
+                    $data['reply_text'] = " لقد قمنا باسناد طلبك الى {$staff_name}";
                     $has_auto_reply = false;
                     break;
                 case 'box-with-location':

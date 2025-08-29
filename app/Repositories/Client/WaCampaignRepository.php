@@ -24,6 +24,7 @@ use App\Enums\MessageStatusEnum;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\SendWhatsAppCampaignMessageJob;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class WaCampaignRepository
 {
@@ -94,6 +95,9 @@ class WaCampaignRepository
             }
         
             $media_url               = null;
+            Log::info($request);
+            Log::info($request->hasFile('video'));
+            Log::info($request->video);
             if ($request->hasFile('image')) {
                 $response  = $this->saveImage($request->image);
                 $media_url = $response['images'];

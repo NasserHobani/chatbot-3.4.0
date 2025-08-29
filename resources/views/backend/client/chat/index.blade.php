@@ -82,6 +82,7 @@
     <input type="hidden" value="{{ setting('pusher_app_key') }}" id="f_pusher_app_key">
     <input type="hidden" value="{{ setting('pusher_app_cluster') }}" id="f_pusher_app_cluster">
     <input type="hidden" value="{{ json_encode(auth()->user()->client) }}" id="auth_user">
+    <input type="hidden" value="{{ json_encode(auth()->user()) }}" id="current_auth_user">
     <input type="hidden" value="{{ json_encode($contact) }}" id="contact">
     <input type="hidden" id="app_path" value="{{ $path }}">
 @endsection
